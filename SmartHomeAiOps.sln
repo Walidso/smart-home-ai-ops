@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Domain", "src\SmartHome.Domain\SmartHome.Domain.csproj", "{9A4ABEF8-0CB4-4433-A049-DDDCA8D59D3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.ConsoleSim", "src\SmartHome.ConsoleSim\SmartHome.ConsoleSim.csproj", "{C21A3F99-42D6-495A-892F-3505E79841EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9A4ABEF8-0CB4-4433-A049-DDDCA8D59D3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A4ABEF8-0CB4-4433-A049-DDDCA8D59D3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A4ABEF8-0CB4-4433-A049-DDDCA8D59D3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A4ABEF8-0CB4-4433-A049-DDDCA8D59D3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C21A3F99-42D6-495A-892F-3505E79841EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C21A3F99-42D6-495A-892F-3505E79841EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C21A3F99-42D6-495A-892F-3505E79841EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C21A3F99-42D6-495A-892F-3505E79841EB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

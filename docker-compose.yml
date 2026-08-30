@@ -1,0 +1,77 @@
+# This file is a preview of Phase 7 — you don't need any of this running yet!
+# For now, `dotnet run` inside src/SmartHome.ConsoleSim is all you need.
+#
+# When you get to Phase 7, uncomment services here one at a time (rabbitmq first,
+# then your own services as you build them, then the mcp-gateway last). To actually
+# talk to the gateway you don't need anything else running: point the official MCP
+# Inspector (or an MCP client like Claude Desktop) at http://localhost:5000.
+
+services:
+  # --- Phase 4+: a real database for sensor readings -------------------------------
+  # postgres:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_USER: smarthome
+  #     POSTGRES_PASSWORD: smarthome
+  #     POSTGRES_DB: smarthome
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+
+  # --- Phase 7: message bus so services can talk without waiting on each other ----
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   ports:
+  #     - "5672:5672"   # app connections
+  #     - "15672:15672" # management UI (guest/guest)
+
+  # --- Phase 7: your own services, once each one exists ---------------------------
+  # sensors-api:
+  #   build: ./src/SmartHome.Sensors.Api
+  #   ports:
+  #     - "5001:8080"
+  #   depends_on:
+  #     - postgres
+  #     - rabbitmq
+
+  # actions-api:
+  #   build: ./src/SmartHome.Actions.Api
+  #   ports:
+  #     - "5002:8080"
+  #   depends_on:
+  #     - rabbitmq
+
+  # notify-service:
+  #   build: ./src/SmartHome.Notify
+  #   depends_on:
+  #     - rabbitmq
+
+  # mcp-gateway:
+  #   build: ./src/SmartHome.McpGateway
+  #   ports:
+  #     - "5000:8080"   # point an MCP client (Claude Desktop, MCP Inspector, etc.) here
+  #   depends_on:
+  #     - sensors-api
+  #     - actions-api
+
+  # --- Phase 8: Prometheus scrapes /metrics from each of your services ------------
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   volumes:
+  #     - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"   # Prometheus's own UI — handy for checking scrapes are working
+  #   depends_on:
+  #     - sensors-api
+
+  # --- Phase 8: Grafana reads from Prometheus and draws the actual dashboards -----
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   ports:
+  #     - "3000:3000"   # open this in your browser — default login admin/admin
+  #   depends_on:
+  #     - prometheus
+
+# volumes:
+#   pgdata:

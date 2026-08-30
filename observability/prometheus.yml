@@ -1,0 +1,21 @@
+# Starter Prometheus config for Phase 8 — not used until you uncomment the
+# `prometheus` service in docker-compose.yml.
+#
+# This tells Prometheus: "every 5 seconds, go fetch /metrics from these services
+# and remember what it says." Add a new job block for each service as you build it.
+
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "sensors-api"
+    static_configs:
+      - targets: ["sensors-api:8080"]
+
+  # - job_name: "actions-api"
+  #   static_configs:
+  #     - targets: ["actions-api:8080"]
+
+  # - job_name: "mcp-gateway"
+  #   static_configs:
+  #     - targets: ["mcp-gateway:8080"]

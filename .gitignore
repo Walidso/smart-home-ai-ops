@@ -1,0 +1,22 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Secrets — never commit these
+appsettings.Development.json
+*.env
+.env
+
+## Local tooling config
+.claude/settings.local.json
