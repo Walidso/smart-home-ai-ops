@@ -5,6 +5,11 @@ obj/
 *.suo
 .vs/
 
+## SQLite databases (local dev data, not source)
+*.db
+*.db-shm
+*.db-wal
+
 ## Rider / VS Code
 .idea/
 .vscode/

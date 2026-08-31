@@ -6,6 +6,7 @@ namespace SmartHome.Domain;
 /// </summary>
 public class SensorReading
 {
+    public Guid Id { get; init; } = Guid.NewGuid();
     public required Guid SensorId { get; init; }
     public required DateTimeOffset Timestamp { get; init; }
     public required double Value { get; init; }

@@ -15,6 +15,28 @@ interview talking points ("walk me through how this project evolved").
 
 <!-- Add entries below, newest at the top -->
 
+### 2026-08-30 — Phase 4: EF Core persistence with SQLite
+- **Built:** Added `Microsoft.EntityFrameworkCore.Sqlite`/`.Design` (pinned to 8.0.11 to match
+  the net8.0 target) to `SmartHome.ConsoleSim`, added an `Id` primary key to `SensorReading`,
+  and created `SmartHomeDbContext` (`Data/SmartHomeDbContext.cs`) with `DbSet<Sensor>` and
+  `DbSet<SensorReading>`. Generated the `InitialCreate` migration and wired `Program.cs` to
+  call `Database.Migrate()` on startup, seed the 5 sensors only on the very first run (loads
+  them from the DB on later runs instead), and persist each batch of readings — plus print an
+  all-time reading count pulled back from the DB to prove it survives restarts.
+- **Learned:** EF Core migrations are versioned C# "recipes" (`Up`/`Down`) for schema changes,
+  applied via `Database.Migrate()`. Also learned why a long-running loop should open a *new*,
+  short-lived `DbContext` per unit of work instead of reusing one for the app's whole lifetime
+  — the change tracker only grows the longer a context stays alive, so one shared context in
+  a forever-loop is a slow memory leak.
+- **Stuck on:** the globally installed `dotnet-ef` CLI tool is v10.x while the project's EF Core
+  packages are 8.0.11 (net8.0 doesn't support EF Core 10). It worked fine for `migrations add`,
+  but this version mismatch is worth remembering if the EF CLI ever misbehaves later — the fix
+  would be a locally pinned `dotnet-ef` via a tool manifest.
+- **Next:** Phase 5 — turn this into `SmartHome.Sensors.Api`, an ASP.NET Core Web API with
+  `GET /sensors` and `GET /sensors/{id}/readings`.
+
+---
+
 ### 2026-08-30 — Phase 3: async simulation loop
 - **Built:** Turned `Program.cs` into an infinite loop — sensor reading generation and the
   LINQ status report now run inside `while (true)`, with `await Task.Delay(3000)` between

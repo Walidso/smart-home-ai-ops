@@ -22,12 +22,12 @@ in `docs/PROGRESS.md`.
 - [x] Wrap sensor generation in `try`/`catch` so one bad sensor doesn't crash the app
 - **Ready when:** you understand why the loop doesn't freeze the console while "waiting."
 
-## Phase 4 — Persistence with EF Core ← you are here
-- [ ] Add a real database (SQLite to start, Postgres later) for sensor readings
-- [ ] EF Core migrations for the `Sensors` and `SensorReadings` tables
+## Phase 4 — Persistence with EF Core
+- [x] Add a real database (SQLite to start, Postgres later) for sensor readings
+- [x] EF Core migrations for the `Sensors` and `SensorReadings` tables
 - **Ready when:** readings survive a restart of the app.
 
-## Phase 5 — Turn it into a Web API
+## Phase 5 — Turn it into a Web API ← you are here
 - [ ] `SmartHome.Sensors.Api` — ASP.NET Core Web API with endpoints like `GET /sensors`,
       `GET /sensors/{id}/readings`
 - [ ] Dependency injection wiring for the DbContext and services
