@@ -15,6 +15,28 @@ interview talking points ("walk me through how this project evolved").
 
 <!-- Add entries below, newest at the top -->
 
+### 2026-09-03 — Phase 5: ASP.NET Core Web API over the shared database
+- **Built:** Extracted `SmartHomeDbContext` and its migrations out of `SmartHome.ConsoleSim`
+  into a new shared `SmartHome.Infrastructure` class library (referenced by both apps) so the
+  simulator and API don't duplicate/diverge on schema. Fixed a real bug along the way: a
+  relative SQLite connection string resolves against whatever the *current process's* working
+  directory happens to be, so the simulator and a second app could easily end up writing to two
+  different database files depending on how each was launched. Fixed by resolving the db path
+  from the running assembly's location up to the solution file, so it's always the same file
+  regardless of launch method. Added `SmartHome.Sensors.Api` (ASP.NET Core minimal API, net8.0)
+  with `SmartHomeDbContext` wired through DI (`AddDbContext`, scoped per request) and two
+  endpoints: `GET /sensors` and `GET /sensors/{id}/readings` (404 for an unknown sensor id).
+- **Learned:** minimal API route handlers get services auto-injected by declaring them as
+  parameters — no manual resolution needed. Also hit and fixed a real EF Core + SQLite
+  limitation: the SQLite provider can't translate `ORDER BY` on a `DateTimeOffset` column into
+  SQL, so readings are pulled with `ToListAsync()` first and sorted client-side in C# instead.
+- **Stuck on:** nothing blocking — just the two gotchas above (db path resolution, DateTimeOffset
+  ordering), both fixed and left as code comments explaining why.
+- **Next:** Phase 6 — split into proper Clean Architecture layers (`Domain`/`Application`/
+  `Infrastructure`/`Api`) with MediatR + FluentValidation, same shape as the other project.
+
+---
+
 ### 2026-08-30 — Phase 4: EF Core persistence with SQLite
 - **Built:** Added `Microsoft.EntityFrameworkCore.Sqlite`/`.Design` (pinned to 8.0.11 to match
   the net8.0 target) to `SmartHome.ConsoleSim`, added an `Id` primary key to `SensorReading`,

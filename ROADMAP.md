@@ -27,13 +27,13 @@ in `docs/PROGRESS.md`.
 - [x] EF Core migrations for the `Sensors` and `SensorReadings` tables
 - **Ready when:** readings survive a restart of the app.
 
-## Phase 5 — Turn it into a Web API ← you are here
-- [ ] `SmartHome.Sensors.Api` — ASP.NET Core Web API with endpoints like `GET /sensors`,
+## Phase 5 — Turn it into a Web API
+- [x] `SmartHome.Sensors.Api` — ASP.NET Core Web API with endpoints like `GET /sensors`,
       `GET /sensors/{id}/readings`
-- [ ] Dependency injection wiring for the DbContext and services
+- [x] Dependency injection wiring for the DbContext and services
 - **Ready when:** you can hit the API from Postman/curl and get real JSON back.
 
-## Phase 6 — Clean Architecture + CQRS
+## Phase 6 — Clean Architecture + CQRS ← you are here
 - [ ] Split into `Domain` / `Application` / `Infrastructure` / `Api` layers (you've done this before!)
 - [ ] Commands: `RecordReadingCommand`. Queries: `GetCurrentStatusQuery`, `GetSensorHistoryQuery`
 - [ ] MediatR + FluentValidation, same shape as your existing project

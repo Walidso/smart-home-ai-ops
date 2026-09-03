@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using SmartHome.ConsoleSim.Data;
 using SmartHome.Domain;
+using SmartHome.Infrastructure.Data;
 
 // --- Phase 4: apply migrations, then seed the house (only on the very first run) ----
 

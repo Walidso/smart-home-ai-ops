@@ -1,0 +1,12 @@
+@SmartHome.Sensors.Api_HostAddress = http://localhost:5152
+
+GET {{SmartHome.Sensors.Api_HostAddress}}/sensors
+Accept: application/json
+
+###
+
+# Replace {id} with a real sensor Id from the /sensors response above
+GET {{SmartHome.Sensors.Api_HostAddress}}/sensors/{id}/readings
+Accept: application/json
+
+###
