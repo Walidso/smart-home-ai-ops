@@ -33,13 +33,16 @@ in `docs/PROGRESS.md`.
 - [x] Dependency injection wiring for the DbContext and services
 - **Ready when:** you can hit the API from Postman/curl and get real JSON back.
 
-## Phase 6 — Clean Architecture + CQRS ← you are here
-- [ ] Split into `Domain` / `Application` / `Infrastructure` / `Api` layers (you've done this before!)
-- [ ] Commands: `RecordReadingCommand`. Queries: `GetCurrentStatusQuery`, `GetSensorHistoryQuery`
-- [ ] MediatR + FluentValidation, same shape as your existing project
+## Phase 6 — Clean Architecture + CQRS
+- [x] Split into `Domain` / `Application` / `Infrastructure` / `Api` layers (you've done this before!)
+- [ ] Command: `RecordReadingCommand` — deferred until the simulator becomes a real service in
+      Phase 7 (for now `ConsoleSim` still writes readings directly via `DbContext`, no DI
+      container there yet)
+- [x] Queries: `GetCurrentStatusQuery`, `GetSensorHistoryQuery`
+- [x] MediatR + FluentValidation, same shape as your existing project
 - **Ready when:** you can explain where new sensor-related code should live.
 
-## Phase 7 — Microservices + MCP (the fun part!)
+## Phase 7 — Microservices + MCP (the fun part!) ← you are here
 - [ ] Split out a second service: `SmartHome.Actions` (proposed actions + approval state)
 - [ ] Add RabbitMQ; Sensors publishes events, Actions subscribes
 - [ ] Add `SmartHome.Notify` — a small service with a Telegram bot that pings you for approval

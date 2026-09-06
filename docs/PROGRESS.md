@@ -15,6 +15,31 @@ interview talking points ("walk me through how this project evolved").
 
 <!-- Add entries below, newest at the top -->
 
+### 2026-09-06 — Phase 6: Clean Architecture + CQRS (Api side)
+- **Built:** New `SmartHome.Application` project holding the CQRS slice for the Api:
+  `GetSensorHistoryQuery` (replaces the old inline `GET /sensors/{id}/readings` logic, now
+  returns `null` for "sensor doesn't exist" vs. an empty list for "exists, no readings yet")
+  and a new `GetCurrentStatusQuery` (latest reading per sensor + an `AnythingHot` flag,
+  backing a new `GET /status` endpoint — full-circle back to the Phase 2 LINQ report, now
+  served over HTTP). Wired MediatR + a `ValidationBehavior` pipeline behavior into the Api so
+  any FluentValidation validator registered for a request runs automatically before its
+  handler. Scoped this to the Api only — `ConsoleSim` still writes readings directly via
+  `DbContext`; `RecordReadingCommand` is deferred until Phase 7 gives the simulator a real DI
+  container.
+- **Learned:** a MediatR pipeline behavior wraps every request before its handler runs — the
+  place for cross-cutting stuff like validation, so individual handlers don't repeat it. Also
+  hit a fun real bug: FluentValidation's default error messages auto-localize based on the
+  server's OS culture — this machine produced Swedish ("måste anges") until pinned to English
+  with `ValidatorOptions.Global.LanguageManager.Enabled = false`. An API's error text
+  shouldn't depend on which machine happens to be hosting it.
+- **Stuck on:** nothing blocking. Deliberately left `GET /sensors` as a plain `DbContext` call
+  in the endpoint rather than wrapping it in a query — it's a one-liner with no real logic, so
+  a query/handler pair would just be ceremony.
+- **Next:** Phase 7 — split out `SmartHome.Actions` as a second service, add RabbitMQ so
+  Sensors can publish events Actions subscribes to, and start on the MCP gateway.
+
+---
+
 ### 2026-09-03 — Phase 5: ASP.NET Core Web API over the shared database
 - **Built:** Extracted `SmartHomeDbContext` and its migrations out of `SmartHome.ConsoleSim`
   into a new shared `SmartHome.Infrastructure` class library (referenced by both apps) so the
