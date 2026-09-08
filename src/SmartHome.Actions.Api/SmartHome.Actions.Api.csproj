@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartHome.Actions.Domain\SmartHome.Actions.Domain.csproj" />
+    <ProjectReference Include="..\SmartHome.Actions.Infrastructure\SmartHome.Actions.Infrastructure.csproj" />
+    <ProjectReference Include="..\SmartHome.Actions.Application\SmartHome.Actions.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
+  </ItemGroup>
+
+</Project>

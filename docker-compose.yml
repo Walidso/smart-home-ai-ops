@@ -20,11 +20,11 @@ services:
   #     - pgdata:/var/lib/postgresql/data
 
   # --- Phase 7: message bus so services can talk without waiting on each other ----
-  # rabbitmq:
-  #   image: rabbitmq:3-management
-  #   ports:
-  #     - "5672:5672"   # app connections
-  #     - "15672:15672" # management UI (guest/guest)
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # app connections
+      - "15672:15672" # management UI (guest/guest)
 
   # --- Phase 7: your own services, once each one exists ---------------------------
   # sensors-api:

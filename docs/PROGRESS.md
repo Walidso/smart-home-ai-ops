@@ -15,6 +15,62 @@ interview talking points ("walk me through how this project evolved").
 
 <!-- Add entries below, newest at the top -->
 
+### 2026-09-08 — Phase 7 (part 2): RabbitMQ ties Sensors and Actions together
+- **Built:** Turned on the `rabbitmq` service in `docker-compose.yml` and wired real pub/sub
+  between the two services. `ConsoleSim` now publishes a `TemperatureAnomalyEvent` (JSON, no
+  shared C# type between services — the message schema is the contract) whenever a temperature
+  reading exceeds the Phase 2 threshold, deduped with a `HashSet<Guid>` so a sensor stuck hot
+  for several 3-second cycles in a row triggers one event, not one every cycle. `Actions.Api`
+  runs a `BackgroundService` (`TemperatureAnomalyConsumer`) that listens on that queue and
+  calls the existing `ProposeActionCommand` for each event — so a hot reading in the simulator
+  turns into a real pending approval in Actions, with no HTTP call between the two services.
+- **Learned:** a message broker decouples publisher from subscriber in a way direct HTTP calls
+  can't — `ConsoleSim` doesn't know or care whether `Actions.Api` is even running; messages just
+  queue up in RabbitMQ until a listener picks them up. Also: a `BackgroundService` is itself a
+  singleton, but MediatR/DbContext are scoped, so the consumer opens a fresh DI scope per
+  message (`IServiceScopeFactory`) — same short-lived unit-of-work idea as everywhere else in
+  this project. And: services come up independently in a microservices system, so
+  `TemperatureAnomalyConsumer` retries its RabbitMQ connection on a fixed delay instead of
+  crashing the Api if the broker isn't ready yet at startup.
+- **Stuck on:** nothing blocking — RabbitMQ.Client 7.x's fully-async API (`IChannel`,
+  `BasicPublishAsync`, `AsyncEventingBasicConsumer`) was a first-try guess based on the
+  library's version, and it compiled and worked correctly without needing a fix-up pass.
+- **Verified live:** ran the simulator until it hit several hot readings, watched `[EVENT]`
+  lines print as they published, then confirmed matching pending approvals appeared in
+  `GET /actions/pending` with the right room/value text — and that approving one made it drop
+  out of the pending list, same as a manually-proposed action.
+- **Next:** `SmartHome.Notify` (Telegram bot) needs a bot token from @BotFather — that's a
+  manual step outside this session. After that: the MCP gateway.
+
+---
+
+### 2026-09-08 — Phase 7 (part 1): SmartHome.Actions.Api, the second microservice
+- **Built:** A genuinely separate second service — `SmartHome.Actions.Domain` /
+  `.Infrastructure` / `.Application` / `.Api`, own SQLite db (`actions.db`), no shared
+  projects with the Sensors service. `ProposedAction` is a richer domain entity than
+  `Sensor`/`SensorReading`: `Approve()`/`Reject()` live on the entity itself and throw if the
+  action isn't `Pending`, so "can't approve twice" is enforced by the domain, not scattered
+  across handler code. Commands: `ProposeActionCommand`, `ApproveActionCommand`,
+  `RejectActionCommand` (the latter two return a `DecisionOutcome` enum — `Success` /
+  `NotFound` / `AlreadyDecided` — mapped to 204/404/409, rather than using exceptions for
+  expected business outcomes). Query: `ListPendingApprovalsQuery`. Duplicated the
+  `ValidationBehavior` pipeline behavior from the Sensors service rather than sharing a
+  library — independent services shouldn't share internal code across the service boundary,
+  even for small cross-cutting pieces.
+- **Learned:** applied the DateTimeOffset-ordering lesson from Phase 5/6 proactively this
+  time — `Enum.ToString()` inside an EF Core `.Select()` projection hits the same kind of SQL
+  translation wall, so `ListPendingApprovalsQueryHandler` fetches entities first and maps to
+  DTOs (including the enum-to-string conversion) in memory, before even trying it the naive
+  way. Also: modeling "already decided" as a return value (`DecisionOutcome`) instead of a
+  thrown exception keeps exceptions reserved for actually-exceptional situations.
+- **Stuck on:** nothing blocking. RabbitMQ, the Telegram-based Notify service, and the MCP
+  gateway are still ahead — deliberately sequenced after this so the approval workflow existed
+  and was fully tested standalone first.
+- **Next:** RabbitMQ next (needs Docker running) — Sensors publishes an event, Actions
+  subscribes and can auto-propose an action from it.
+
+---
+
 ### 2026-09-06 — Phase 6: Clean Architecture + CQRS (Api side)
 - **Built:** New `SmartHome.Application` project holding the CQRS slice for the Api:
   `GetSensorHistoryQuery` (replaces the old inline `GET /sensors/{id}/readings` logic, now

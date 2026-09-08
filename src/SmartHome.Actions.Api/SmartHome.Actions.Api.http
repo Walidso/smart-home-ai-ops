@@ -1,0 +1,25 @@
+@SmartHome.Actions.Api_HostAddress = http://localhost:5073
+
+POST {{SmartHome.Actions.Api_HostAddress}}/actions
+Content-Type: application/json
+
+{
+  "description": "Turn off the office heater - it has been on for 6 hours",
+  "targetRoom": "Office"
+}
+
+###
+
+GET {{SmartHome.Actions.Api_HostAddress}}/actions/pending
+Accept: application/json
+
+###
+
+# Replace {id} with a real action id from the responses above
+POST {{SmartHome.Actions.Api_HostAddress}}/actions/{id}/approve
+
+###
+
+POST {{SmartHome.Actions.Api_HostAddress}}/actions/{id}/reject
+
+###

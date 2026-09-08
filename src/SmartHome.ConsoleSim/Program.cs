@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SmartHome.ConsoleSim.Messaging;
 using SmartHome.Domain;
 using SmartHome.Infrastructure.Data;
 
@@ -24,6 +25,14 @@ using (var seedDb = new SmartHomeDbContext())
         seedDb.SaveChanges();
     }
 }
+
+// --- Phase 7: connect to RabbitMQ so we can publish temperature anomalies as they happen ---
+
+await using var anomalyPublisher = await TemperatureAnomalyPublisher.TryCreateAsync();
+
+// Tracks which sensors currently have an "open" anomaly, so a sensor stuck above the
+// threshold for several batches in a row publishes one event, not one every 3 seconds.
+var alreadyAlerted = new HashSet<Guid>();
 
 // --- Phase 3: loop forever, generating a fresh batch of readings every few seconds ---
 
@@ -99,6 +108,28 @@ while (true)
         sensors.First(s => s.Id == r.SensorId).Type == SensorType.Temperature && r.Value > 27);
 
     Console.WriteLine($"\nAnything running hot (>27°C)? {(anythingHot ? "YES ⚠️" : "No, all good")}");
+
+    // --- Phase 7: publish an event for each newly-hot sensor, so Actions can propose turning
+    // something off. HashSet<T>.Add returns false if the item was already present, which
+    // doubles nicely as the "have we already alerted for this one?" check.
+    if (anomalyPublisher is not null)
+    {
+        foreach (var reading in temperatureReadings)
+        {
+            bool isHot = reading.Value > 27;
+            if (isHot && alreadyAlerted.Add(reading.SensorId))
+            {
+                var sensor = sensors.First(s => s.Id == reading.SensorId);
+                await anomalyPublisher.PublishAsync(new TemperatureAnomalyEvent(
+                    sensor.Name, sensor.Room, reading.Value, reading.Unit, reading.Timestamp));
+                Console.WriteLine($"[EVENT] Published temperature anomaly: {sensor.Name} at {reading.Value}{reading.Unit}");
+            }
+            else if (!isHot)
+            {
+                alreadyAlerted.Remove(reading.SensorId);
+            }
+        }
+    }
 
     // --- Phase 4: persist this batch, then prove it survives restarts by showing the
     // all-time total pulled back out of the database.
