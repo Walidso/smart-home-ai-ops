@@ -15,6 +15,36 @@ interview talking points ("walk me through how this project evolved").
 
 <!-- Add entries below, newest at the top -->
 
+### 2026-09-12 — Phase 7 (part 3): SmartHome.Notify, a real Telegram approval loop
+- **Built:** `SmartHome.Notify`, a Worker Service (no HTTP listener — just background
+  services) that closes the human-in-the-loop story for real. `Actions.Api`'s
+  `ProposeActionCommandHandler` now publishes an in-process MediatR `ActionProposedNotification`
+  after saving; a handler for that notification forwards it out over RabbitMQ via a new
+  `IActionEventPublisher` interface (defined in Application, implemented with RabbitMQ in Api —
+  dependency inversion, so Application never references RabbitMQ.Client directly). `Notify`
+  subscribes to that queue and sends a Telegram message with inline Approve/Reject buttons
+  (`Telegram.Bot`, long-polling — no public webhook needed for local dev). Tapping a button
+  calls straight back into `Actions.Api`'s `/actions/{id}/approve|reject` endpoints and edits
+  the Telegram message in place with the result. Bot token and chat id live in .NET's Secret
+  Manager (`dotnet user-secrets`), never in a committed file.
+- **Learned:** the difference between a MediatR notification (in-process pub/sub — multiple
+  handlers in the *same* app can react to one event) and a RabbitMQ message (pub/sub *between*
+  processes) — this feature uses both, one after the other. Also practiced dependency
+  inversion for real: `IActionEventPublisher` is declared where it's *needed* (Application),
+  not where it's *implemented* (Api).
+- **Verified live:** proposed an action via HTTP, watched it arrive on Telegram with buttons
+  within a couple seconds, tapped Approve, watched the message edit in place to "✅ Approved.",
+  and confirmed via `GET /actions/pending` and the Actions.Api SQL logs that the underlying row
+  really updated — not just a UI illusion on the Telegram side.
+- **Stuck on:** nothing blocking. Telegram.Bot 22.x's API (mostly de-`Async`-suffixed method
+  names, e.g. `SendMessage` not `SendTextMessageAsync`) was a first-try guess based on the
+  installed version and compiled correctly without a fix-up pass.
+- **Next:** the MCP gateway — `SmartHome.McpGateway` exposing `get_house_status`,
+  `propose_action`, and `list_pending_approvals` as MCP tools, tested with the MCP Inspector
+  before connecting a real client like Claude Desktop.
+
+---
+
 ### 2026-09-08 — Phase 7 (part 2): RabbitMQ ties Sensors and Actions together
 - **Built:** Turned on the `rabbitmq` service in `docker-compose.yml` and wired real pub/sub
   between the two services. `ConsoleSim` now publishes a `TemperatureAnomalyEvent` (JSON, no

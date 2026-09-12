@@ -45,7 +45,7 @@ in `docs/PROGRESS.md`.
 ## Phase 7 — Microservices + MCP (the fun part!) ← you are here
 - [x] Split out a second service: `SmartHome.Actions` (proposed actions + approval state)
 - [x] Add RabbitMQ; Sensors publishes events, Actions subscribes
-- [ ] Add `SmartHome.Notify` — a small service with a Telegram bot that pings you for approval
+- [x] Add `SmartHome.Notify` — a small service with a Telegram bot that pings you for approval
 - [ ] Build `SmartHome.McpGateway` using `ModelContextProtocol.AspNetCore`, exposing tools:
       `get_house_status`, `propose_action`, `list_pending_approvals`
 - [ ] Test it with the official **MCP Inspector** (a small dev tool from the MCP project

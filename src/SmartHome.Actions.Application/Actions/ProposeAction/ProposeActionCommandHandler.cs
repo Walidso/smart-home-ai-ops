@@ -4,7 +4,8 @@ using SmartHome.Actions.Infrastructure.Data;
 
 namespace SmartHome.Actions.Application.Actions.ProposeAction;
 
-public class ProposeActionCommandHandler(ActionsDbContext db) : IRequestHandler<ProposeActionCommand, ProposedActionDto>
+public class ProposeActionCommandHandler(ActionsDbContext db, IPublisher publisher)
+    : IRequestHandler<ProposeActionCommand, ProposedActionDto>
 {
     public async Task<ProposedActionDto> Handle(ProposeActionCommand request, CancellationToken cancellationToken)
     {
@@ -16,6 +17,10 @@ public class ProposeActionCommandHandler(ActionsDbContext db) : IRequestHandler<
 
         db.ProposedActions.Add(action);
         await db.SaveChangesAsync(cancellationToken);
+
+        await publisher.Publish(
+            new ActionProposedNotification(action.Id, action.Description, action.TargetRoom, action.ProposedAt),
+            cancellationToken);
 
         return new ProposedActionDto(
             action.Id, action.Description, action.TargetRoom,

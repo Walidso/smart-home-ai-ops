@@ -23,6 +23,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Propo
 builder.Services.AddValidatorsFromAssembly(typeof(ProposeActionCommand).Assembly);
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
+builder.Services.AddSingleton<IActionEventPublisher, RabbitMqActionEventPublisher>();
 builder.Services.AddHostedService<TemperatureAnomalyConsumer>();
 
 var app = builder.Build();
