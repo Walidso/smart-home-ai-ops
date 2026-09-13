@@ -42,20 +42,20 @@ in `docs/PROGRESS.md`.
 - [x] MediatR + FluentValidation, same shape as your existing project
 - **Ready when:** you can explain where new sensor-related code should live.
 
-## Phase 7 — Microservices + MCP (the fun part!) ← you are here
+## Phase 7 — Microservices + MCP (the fun part!)
 - [x] Split out a second service: `SmartHome.Actions` (proposed actions + approval state)
 - [x] Add RabbitMQ; Sensors publishes events, Actions subscribes
 - [x] Add `SmartHome.Notify` — a small service with a Telegram bot that pings you for approval
-- [ ] Build `SmartHome.McpGateway` using `ModelContextProtocol.AspNetCore`, exposing tools:
+- [x] Build `SmartHome.McpGateway` using `ModelContextProtocol.AspNetCore`, exposing tools:
       `get_house_status`, `propose_action`, `list_pending_approvals`
-- [ ] Test it with the official **MCP Inspector** (a small dev tool from the MCP project
+- [x] Test it with the official **MCP Inspector** (a small dev tool from the MCP project
       that lets you call your tools by hand, no AI needed, before connecting a real client)
-- [ ] Connect a real MCP client — e.g. Claude Desktop — and have an actual conversation
+- [x] Connect a real MCP client — e.g. Claude Desktop — and have an actual conversation
       about your (simulated) house
 - **Ready when:** you can ask "is anything weird going on at home?" through an MCP client
   and it calls your API to answer for real.
 
-## Phase 8 — Observability with Prometheus + Grafana
+## Phase 8 — Observability with Prometheus + Grafana ← you are here
 - [ ] Add the `prometheus-net.AspNetCore` package to each service and expose a `/metrics` endpoint
       (a plain-text page listing numbers like request counts — Prometheus reads it periodically)
 - [ ] Add a couple of your own custom metrics, not just the free built-in ones — e.g. a gauge for

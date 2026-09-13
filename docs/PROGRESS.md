@@ -15,6 +15,68 @@ interview talking points ("walk me through how this project evolved").
 
 <!-- Add entries below, newest at the top -->
 
+### 2026-09-12 — Phase 7 (part 5): Claude Desktop connected for real — Phase 7 complete
+- **Built:** Got a real MCP client (Claude Desktop) talking to the gateway. Claude Desktop's
+  Connectors feature requires HTTPS, which a plain `dotnet run` on `http://` doesn't provide.
+  Tried a local ASP.NET Core dev certificate first (`dotnet dev-certs https --trust`) — Windows
+  itself trusted it (confirmed via `curl.exe`, which uses the OS TLS stack), but Claude Desktop
+  still reported "couldn't reach this address," most likely because its connector-checking logic
+  runs through a Node-based MCP client with its own separate CA store (the MCP Inspector CLI
+  failed identically against the same cert, with an explicit "self-signed certificate" error).
+  Solved it with a Cloudflare quick tunnel (`cloudflared tunnel --url http://localhost:5041`,
+  no account needed) — a real, publicly-trusted certificate in front of the local server. Also
+  rewrote README.md for a public audience (removed personal asides, added a Mermaid
+  architecture diagram + project structure tree, honesty pass on what's actually built vs.
+  planned) and added an MIT LICENSE.
+- **Learned:** "the OS trusts a certificate" and "every app on that OS trusts it" are not the
+  same thing — Node.js (and anything built on it, likely including Claude Desktop's MCP client
+  internals) ships its own CA bundle rather than deferring to the Windows certificate store,
+  while curl.exe and presumably Chromium's own networking stack do defer to it. When a
+  local-only fix doesn't work for a Node-based client, a tunnel with a real CA-issued cert is a
+  fast, no-infrastructure way to route around the trust mismatch entirely.
+- **Verified live:** connected Claude Desktop as a custom connector via the tunnel URL, then
+  asked "Is anything weird going on at home right now?" in a normal chat with no mention of
+  tools or the connector — Claude called `get_house_status` and `list_pending_approvals` on its
+  own, gave a genuinely useful answer grounded in real (if stale, correctly flagged as such)
+  data, and correctly noted it had no approve/reject tool available to it.
+- **Stuck on:** nothing now, but worth remembering: the Cloudflare tunnel is a temporary public
+  URL — fine for testing, not something to leave running unattended.
+- **Next:** Phase 7 is done. Phase 8 — Prometheus + Grafana observability — is next.
+
+---
+
+### 2026-09-12 — Phase 7 (part 4): SmartHome.McpGateway
+- **Built:** `SmartHome.McpGateway` using the official `ModelContextProtocol.AspNetCore` SDK
+  (v2.2.0, out of preview). It's deliberately thin — every tool just translates an MCP call
+  into a plain HTTP call against Sensors.Api or Actions.Api and returns the JSON, no business
+  logic duplicated here. Three tools, named exactly as the roadmap specifies via
+  `[McpServerTool(Name = "...")]`: `get_house_status` (→ Sensors `GET /status`), `propose_action`
+  (→ Actions `POST /actions`), `list_pending_approvals` (→ Actions `GET /actions/pending`).
+  Deliberately skipped routing gateway→service calls through RabbitMQ (the original README
+  diagram's implication) — our queues so far are fire-and-forget events, and building
+  request/response RPC over RabbitMQ (correlation ids, reply-to queues) would have been a much
+  bigger, separate piece of scope for no real benefit here; direct HTTP is the right tool for a
+  synchronous query/command.
+- **Learned:** the MCP C# SDK maps cleanly onto what we'd already built — `[McpServerToolType]`
+  + `[McpServerTool]` + `[Description]` attributes are literally what an LLM client reads to
+  decide when and how to call a tool, so writing good descriptions is not an afterthought.
+  Also found and used the MCP Inspector's `--cli` mode (`npx @modelcontextprotocol/inspector@latest
+  --cli --server-url <url> --transport http --method tools/list|tools/call`), which drives the
+  real MCP JSON-RPC protocol headlessly — useful since testing the browser UI isn't something
+  that can be automated from here.
+- **Verified live:** started all three backend services plus the gateway, ran `tools/list` and
+  confirmed all three tools with correct names/schemas, then called all three tools for real —
+  `get_house_status` returned live sensor data, `propose_action` created a genuine pending
+  approval (visible afterward via `list_pending_approvals`).
+- **Stuck on:** nothing on the gateway itself — every `ModelContextProtocol.AspNetCore` API
+  guess (`AddMcpServer().WithHttpTransport().WithTools<T>()`, `app.MapMcp()`) compiled and
+  worked on the first try.
+- **Next:** the one item left in Phase 7 — connect a real MCP client (Claude Desktop) and have
+  an actual conversation about the house. That's a manual step on your end (I can't drive your
+  Claude Desktop app from here) — I gave you the connection details separately.
+
+---
+
 ### 2026-09-12 — Phase 7 (part 3): SmartHome.Notify, a real Telegram approval loop
 - **Built:** `SmartHome.Notify`, a Worker Service (no HTTP listener — just background
   services) that closes the human-in-the-loop story for real. `Actions.Api`'s
